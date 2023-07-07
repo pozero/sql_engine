@@ -6,6 +6,8 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
+import java.util.List;
+
 /**
  * sys_db : user_db_info
  */
@@ -19,4 +21,9 @@ public interface UserDbInfoMapper {
     @Select("select * from user_db_info where id = #{dbId}")
     UserDbInfo select(Integer dbId);
 
+    @Select("select * from user_db_info")
+    List<UserDbInfo> selectAll();
+
+    @Select("show databases")
+    List<String> showAllDb();
 }

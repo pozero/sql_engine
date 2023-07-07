@@ -4,13 +4,15 @@ import { Sidebar, Menu, MenuItem, useProSidebar } from 'react-pro-sidebar';
 import * as React from 'react';
 
 import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
-import DeleteIcon from '@mui/icons-material/Delete';
 
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
-import { Container, Paper } from '@mui/material';
+import { Paper } from '@mui/material';
 import Button from '@mui/material/Button';
 
+import RequestMethod from "./components/RequestMethod";
+import DatabaseSelectId from './components/DatabaseSelectId';
+import DatabaseSelectName from './components/DatabaseSelectName';
 
 function App() {
   const { collapseSidebar } = useProSidebar();
@@ -20,21 +22,14 @@ function App() {
   const [dbId, setDbid] = React.useState('');
   const [userSql, setSql] = React.useState('');
   const [apis, setApis] = React.useState([]);
+
+  const [dbName, setDbName] = React.useState('');
+  const [dbAddr, setDbAddr] = React.useState('');
+  const [user, setUser] = React.useState('');
+  const [password, setPassword] = React.useState('');
+
   const paperStyle = { padding: '50px 20px', width: 600, margin: 'auto auto' }
 
-  const addClick = (e) => {
-    e.preventDefault()
-    const api = { url, method, userSql, dbId }
-    console.log(JSON.stringify(api))
-    fetch("http://localhost:8080/url/sql",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(api)
-      }).then(() => {
-        console.log("New api added")
-      })
-  }
   React.useEffect(() => {
     fetch("http://localhost:8080/url/sql")
       .then(res => res.json())
@@ -42,7 +37,6 @@ function App() {
         setApis(result)
       })
   })
-  // console.log(apis)
   const apiList = apis.map(api => (
     <MenuItem
       onClick={() => {
@@ -56,7 +50,7 @@ function App() {
 
     </MenuItem>
   ))
-  
+
   return (
     <div className="app" style={({ height: "100vh" }, { display: "flex" })}>
       <Sidebar style={{ height: "100vh" }} backgroundColor='rgb(150, 150, 150)'>
@@ -90,12 +84,8 @@ function App() {
           <TextField id="outlined-basic" label="url" variant="outlined" fullWidth
             value={url}
             onChange={(e) => setUrl(e.target.value)} />
-          <TextField id="outlined-basic" label="method" variant="outlined" fullWidth
-            value={method}
-            onChange={(e) => setMethod(e.target.value)} />
-          <TextField id="outlined-basic" label="database id" variant="outlined" fullWidth
-            value={dbId}
-            onChange={(e) => setDbid(e.target.value)} />
+          {RequestMethod(method, setMethod)}
+          {DatabaseSelectId(dbId, setDbid)}
           <TextField
             id="outlined-multiline-static"
             label="SQL Command"
@@ -104,11 +94,23 @@ function App() {
             value={userSql}
             onChange={(e) => setSql(e.target.value)}
           />
-          <Button variant="contained" onClick={addClick}>
+          <Button variant="contained" onClick={(e) => {
+            e.preventDefault()
+            const api = { url, method, userSql, dbId }
+            console.log(JSON.stringify(api))
+            fetch("http://localhost:8080/url/sql",
+              {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(api)
+              }).then(() => {
+                console.log("New api added")
+              })
+          }
+          }>
             提交
           </Button>
-
-          <Button variant='contained' icon={<DeleteIcon />} onClick={(e) => {
+          <Button variant='contained' onClick={(e) => {
             e.preventDefault();
             console.log(url, method);
             fetch("http://localhost:8080/url/sql",
@@ -122,8 +124,44 @@ function App() {
           }}>
             删除
           </Button>
-
         </Box>
+      </Paper>
+
+      <Paper elevation={3} style={paperStyle}>
+        <h2><u>添加数据库</u></h2>
+        <Box
+          component="form"
+          sx={{
+            '& > :not(style)': { m: 1, width: '25ch' },
+          }}
+          noValidate
+          autoComplete="off"
+        >
+          {DatabaseSelectName(dbName, setDbName)}
+          <TextField id="outlined-basic" label="database address" variant="outlined" fullWidth
+            value={dbAddr}
+            onChange={(e) => setDbAddr(e.target.value)} />
+          <TextField id="outlined-basic" label="user" variant="outlined" fullWidth
+            value={user}
+            onChange={(e) => setUser(e.target.value)} />
+          <TextField id="outlined-basic" label="password" variant="outlined" fullWidth type='password'
+            value={password}
+            onChange={(e) => setPassword(e.target.value)} />
+        </Box>
+        <Button variant="contained" onClick={(e) => {
+          e.preventDefault();
+          const dbInfo = { dbName, dbAddr, user, password };
+          console.log(dbInfo);
+          fetch("http://localhost:8080/datasource",
+            {
+              "method": "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(dbInfo)
+            }
+          );
+        }}>
+          提交
+        </Button>
       </Paper>
     </div>
   );
