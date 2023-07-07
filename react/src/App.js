@@ -11,21 +11,22 @@ import TextField from '@mui/material/TextField';
 import { Container, Paper } from '@mui/material';
 import Button from '@mui/material/Button';
 
+
 function App() {
   const { collapseSidebar } = useProSidebar();
 
   const [url, setUrl] = React.useState('');
   const [method, setMethod] = React.useState('');
   const [dbId, setDbid] = React.useState('');
-  const [sql, setSql] = React.useState('');
-  const [apis, setApis] = React.useState('');
+  const [userSql, setSql] = React.useState('');
+  const [apis, setApis] = React.useState([]);
   const paperStyle = { padding: '50px 20px', width: 600, margin: 'auto auto' }
 
   const addClick = (e) => {
     e.preventDefault()
-    const api = { url, method, sql, dbId }
-    console.log(api)
-    fetch("http://localhost:8080/api/sql",
+    const api = { url, method, userSql, dbId }
+    console.log(JSON.stringify(api))
+    fetch("http://localhost:8080/url/sql",
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -35,37 +36,27 @@ function App() {
       })
   }
   React.useEffect(() => {
-    fetch("http://localhost:8080/api/sql")
+    fetch("http://localhost:8080/url/sql")
       .then(res => res.json())
       .then((result) => {
         setApis(result)
       })
   })
+  // console.log(apis)
   const apiList = apis.map(api => (
     <MenuItem
       onClick={() => {
         setUrl(api.url);
         setMethod(api.method);
         setDbid(api.dbId);
-        setSql(api.sql);
+        setSql(api.userSql);
       }}>
       {api.url} {api.method}<br />
       {api.dbId} {api.userSql}
-      <Button icon={<DeleteIcon />} onClick={(e) => {
-        e.preventDefault();
-        console.log(api.url, api.method);
-        fetch("http://localhost:8080/api/sql",
-          {
-            method: "DELETE",
-            headers: { "Content-Type": "application/json" },
-            body: { "url": api.url, "method": api.method }
-          }).then(() => {
-            console.log("Api Deleted")
-          })
-      }}>
-      </Button>
+
     </MenuItem>
   ))
+  
   return (
     <div className="app" style={({ height: "100vh" }, { display: "flex" })}>
       <Sidebar style={{ height: "100vh" }} backgroundColor='rgb(150, 150, 150)'>
@@ -87,7 +78,7 @@ function App() {
       </main>
 
       <Paper elevation={3} style={paperStyle}>
-        <h2><u>编辑映射</u></h2>
+        <h2><u>生成Api接口</u></h2>
         <Box
           component="form"
           sx={{
@@ -110,12 +101,28 @@ function App() {
             label="SQL Command"
             multiline
             rows={4}
-            value={sql}
+            value={userSql}
             onChange={(e) => setSql(e.target.value)}
           />
           <Button variant="contained" onClick={addClick}>
             提交
           </Button>
+
+          <Button variant='contained' icon={<DeleteIcon />} onClick={(e) => {
+            e.preventDefault();
+            console.log(url, method);
+            fetch("http://localhost:8080/url/sql",
+              {
+                method: "DELETE",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ "url": url, "method": method })
+              }).then(() => {
+                console.log("Api Deleted")
+              })
+          }}>
+            删除
+          </Button>
+
         </Box>
       </Paper>
     </div>
