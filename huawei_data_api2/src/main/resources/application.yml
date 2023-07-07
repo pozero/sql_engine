@@ -1,0 +1,31 @@
+spring:
+  # 配置mysql数据源
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/sys_db?characterEncoding=utf-8&serverTimezone=UTC
+    username: root
+    password: jhsyfflol1023H
+
+mybatis:
+  configuration:
+    # 下划线转驼峰
+    map-underscore-to-camel-case: true
+
+Spring:
+  redis:
+    host: 101.33.200.62
+    port: 6379
+    password: 123321
+    lettuce:
+      pool:
+        max-active: 8  # 最大连接
+        max-idle: 8  # 最大空闲连接
+        min-idle: 0  # 最小空闲连接
+        max-wait: 100  # 连接等待时间
+
+  thymeleaf:
+    mode: HTML
+    cache: false
+    prefix: classpath:/templates/
+    suffix: .html
+
