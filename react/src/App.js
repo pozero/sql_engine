@@ -4,6 +4,10 @@ import { Sidebar, Menu, MenuItem, useProSidebar } from 'react-pro-sidebar';
 import * as React from 'react';
 
 import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
+import GetAppIcon from '@mui/icons-material/GetApp';
+import LocalPostOfficeIcon from '@mui/icons-material/LocalPostOffice';
+import DeleteIcon from '@mui/icons-material/Delete';
+import SyncIcon from '@mui/icons-material/Sync';
 
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
@@ -13,6 +17,7 @@ import Button from '@mui/material/Button';
 import RequestMethod from "./components/RequestMethod";
 import DatabaseSelectId from './components/DatabaseSelectId';
 import DatabaseSelectName from './components/DatabaseSelectName';
+import { Api } from '@mui/icons-material';
 
 function App() {
   const { collapseSidebar } = useProSidebar();
@@ -28,7 +33,9 @@ function App() {
   const [user, setUser] = React.useState('');
   const [password, setPassword] = React.useState('');
 
-  const paperStyle = { padding: '50px 20px', width: 600, margin: 'auto auto' }
+  const paperStyle = {
+    padding: '50px 20px', width: 600, margin: 'auto auto',
+  }
 
   React.useEffect(() => {
     fetch("http://localhost:8080/url/sql")
@@ -38,16 +45,19 @@ function App() {
       })
   })
   const apiList = apis.map(api => (
-    <MenuItem
+    <MenuItem icon={
+      api.method == "GET" ? <GetAppIcon /> :
+        api.method == "POST" ? <LocalPostOfficeIcon /> :
+          api.method == "DELETE" ? <DeleteIcon /> : <SyncIcon />
+    }
       onClick={() => {
         setUrl(api.url);
         setMethod(api.method);
         setDbid(api.dbId);
         setSql(api.userSql);
       }}>
-      {api.url} {api.method}<br />
-      {api.dbId} {api.userSql}
-
+      {api.url} <br />
+      {/* {api.dbId} {api.userSql} */}
     </MenuItem>
   ))
 
@@ -128,7 +138,7 @@ function App() {
       </Paper>
 
       <Paper elevation={3} style={paperStyle}>
-        <h2><u>添加数据库</u></h2>
+        <h2><u>配置数据源</u></h2>
         <Box
           component="form"
           sx={{
@@ -147,21 +157,23 @@ function App() {
           <TextField id="outlined-basic" label="password" variant="outlined" fullWidth type='password'
             value={password}
             onChange={(e) => setPassword(e.target.value)} />
+
+          <Button variant="contained" onClick={(e) => {
+            e.preventDefault();
+            const dbInfo = { dbName, dbAddr, user, password };
+            console.log(dbInfo);
+            fetch("http://localhost:8080/datasource",
+              {
+                "method": "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(dbInfo)
+              }
+            );
+          }}>
+            提交
+          </Button>
+
         </Box>
-        <Button variant="contained" onClick={(e) => {
-          e.preventDefault();
-          const dbInfo = { dbName, dbAddr, user, password };
-          console.log(dbInfo);
-          fetch("http://localhost:8080/datasource",
-            {
-              "method": "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(dbInfo)
-            }
-          );
-        }}>
-          提交
-        </Button>
       </Paper>
     </div>
   );
